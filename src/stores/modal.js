@@ -7,7 +7,7 @@ export default defineStore("modal",{
     }),
     getters:{
         hiddenClass(state){
-            return !state.isOpen ? 'hidden':'';
+            return !state.isOpen ? "hidden":"";
         }
     }
 
