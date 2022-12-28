@@ -77,7 +77,7 @@
             </button>
           </form>
           <!-- Registration Form -->
-          <vee-form v-show="tab==='register'" :validation-schema="schema">
+          <vee-form v-show="tab==='register'" :validation-schema="schema" @submit="register">
             <!-- Name -->
 
             <div class="grid grid-cols-2 gap-1 justify-evenly">
@@ -140,21 +140,28 @@
               <!-- Country -->
               <div class="mb-3">
                 <label class="inline-block mb-2">Country</label>
-                <select
+                <vee-field as="select" name="country"
                     class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                 >
                   <option value="USA">USA</option>
                   <option value="Mexico">Mexico</option>
                   <option value="Germany">Germany</option>
-                </select>
+                  <option value="Antarctica">Antarctica</option>
+                </vee-field>
+                <ErrorMessage class="text-red-600" name="country" />
+
               </div>
               <!-- TOS -->
               <div class="mb-3 col-span-2 pl-6">
-                <input
+                <vee-field
                     type="checkbox"
+                    name="tos"
+                    value="1"
                     class="w-4 h-4 float-left -ml-6 mt-1 rounded"
                 />
                 <label class="inline-block">Accept terms of service</label>
+                <ErrorMessage class="text-red-600 block" name="tos" />
+
               </div>
               <button
                   class="block col-span-2 w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
@@ -185,8 +192,8 @@ export default {
         'age' : 'required|min_value:18|max_value:100',
         'password' : 'required|min:3|max:100',
         'confirm_password' : 'confirmed:@password',
-        'counry' : '',
-        'tos' : '',
+        'country' : 'required|excluded:Antarctica',
+        'tos' : 'required',
       },
     }
   },
@@ -196,6 +203,11 @@ export default {
       "modalVisibility" : "isOpen"
     })
   },
+  methods:{
+    register(values){
+      console.log(values);
+    }
+  }
 }
 
 
