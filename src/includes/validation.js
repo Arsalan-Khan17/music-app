@@ -1,15 +1,16 @@
-import {Form as VeeForm, Field as VeeField, defineRule, ErrorMessage, configure} from 'vee-validate';
+import {configure, defineRule, ErrorMessage, Field as VeeField, Form as VeeForm} from 'vee-validate';
 import {
     alpha_spaces as alphaSpaces,
+    confirmed,
     email,
     max,
-    min,
-    required,
-    min_value as minValue,
     max_value as maxValue,
-    confirmed,
-    not_one_of as excluded
+    min,
+    min_value as minValue,
+    not_one_of as excluded,
+    required
 } from "@vee-validate/rules";
+
 export default{
     install(app) {
         app.component('VeeForm', VeeForm)
@@ -45,8 +46,7 @@ export default{
 
             };
 
-            const message = messages[ctx.rule.name] ? messages[ctx.rule.name] : `The field ${ctx.field} is invalid`;
-            return message;
+            return messages[ctx.rule.name] ? messages[ctx.rule.name] : `The field ${ctx.field} is invalid`;
             },
             validateOnBlur:true,
             validateOnChange:true,

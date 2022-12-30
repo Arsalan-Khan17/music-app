@@ -185,7 +185,7 @@
 
 <script>
 import useModalStore from '../stores/modal'
-import {mapState,mapWritableState} from "pinia/dist/pinia";
+import {mapState,mapWritableState} from "pinia";
 export default {
   data(){
     return{
