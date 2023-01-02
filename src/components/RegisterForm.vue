@@ -151,23 +151,24 @@ export default {
          this.reg_in_submission = false;
          this.reg_alert_variant = 'bg-red-500';
          this.reg_alert_msg = error.code === 'auth/email-already-in-use' ? 'An account with this email already exists' : 'An unexpected error occurred...try again later';
-         return;
        });
 
-       try {
-         const docRef = await addDoc(userCollection, {
-           name: values.name,
-           email: values.email,
-           age: values.age,
-           country: values.country
-         });
-         console.log("Document written with ID: ", docRef.id);
-       } catch (e) {
-         this.reg_in_submission = false;
-         this.reg_alert_variant = 'bg-red-500';
-         this.reg_alert_msg ='An unexpected error occurred...try again later';
-         return;
+       if(userCred){
+         try {
+           const docRef = await addDoc(userCollection, {
+             name: values.name,
+             email: values.email,
+             age: values.age,
+             country: values.country
+           });
+           console.log("Document written with ID: ", docRef.id);
+         } catch (e) {
+           this.reg_in_submission = false;
+           this.reg_alert_variant = 'bg-red-500';
+           this.reg_alert_msg ='An unexpected error occurred...try again later';
+         }
        }
+
      },
 
   }
