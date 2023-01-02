@@ -106,6 +106,10 @@
 </template>
 
 <script>
+import {createUserWithEmailAndPassword} from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
+
+import {auth,db} from '@/includes/firebase'
 export default {
   name: "RegisterForm",
   data(){
@@ -131,15 +135,24 @@ export default {
     }
   },
   methods:{
-    register(values){
+     register(values){
       this.reg_in_submission = true;
       this.reg_show_alert = true;
       this.reg_alert_variant = 'bg-blue-500';
       this.reg_alert_msg = 'Please wait! Your account is being created';
 
-      this.reg_alert_variant = 'bg-green-500';
-      this.reg_alert_msg = 'Success! Your account has been created';
-    },
+      let  userCred = null;
+       createUserWithEmailAndPassword(auth,values.email,values.password).then((userCredential) => {
+         // Signed in
+         userCred = userCredential.user;
+         this.reg_alert_variant = 'bg-green-500';
+         this.reg_alert_msg = 'Success! Your account has been created';
+       }).catch((error) => {
+             this.reg_in_submission = false;
+             this.reg_alert_variant = 'bg-red-500';
+             this.reg_alert_msg = error.code === 'auth/email-already-in-use' ? 'An account with this email already exists' :   'An unexpected error occurred...try again later';
+           });
+       },
 
   }
 }
