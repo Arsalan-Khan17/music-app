@@ -106,10 +106,12 @@
 </template>
 
 <script>
+import useUserStore from '../stores/user.js';
 import {createUserWithEmailAndPassword} from "firebase/auth";
 import { collection, addDoc } from "firebase/firestore";
 
 import {auth,db,userCollection} from '@/includes/firebase'
+import {mapStores} from "pinia/dist/pinia";
 export default {
   name: "RegisterForm",
   data(){
@@ -133,6 +135,9 @@ export default {
       reg_alert_msg : 'Please wait! Your account is being created '
 
     }
+  },
+  computed:{
+    ...mapStores(useUserStore)
   },
   methods:{
      async register(values) {
@@ -161,7 +166,10 @@ export default {
              age: values.age,
              country: values.country
            });
-           console.log("Document written with ID: ", docRef.id);
+           this.reg_alert_variant = 'bg-green-500';
+           this.reg_alert_msg = 'Success! Your account has been created';
+           this.userStore.userLoggedIn = true;
+
          } catch (e) {
            this.reg_in_submission = false;
            this.reg_alert_variant = 'bg-red-500';
