@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import {getAuth} from "firebase/auth";
+import {getAuth,onAuthStateChanged} from "firebase/auth";
 import {collection, getFirestore} from "firebase/firestore";
 
 const firebaseConfig = {
@@ -21,5 +21,6 @@ const userCollection = collection(db,'users');
 export {
     auth,
     db,
-    userCollection
+    userCollection,
+    onAuthStateChanged
 };
