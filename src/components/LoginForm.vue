@@ -37,6 +37,9 @@
 </template>
 
 <script>
+import {mapActions} from "pinia/dist/pinia";
+import useUserStore from "../stores/user";
+
 export default {
   name: "LoginForm",
 
@@ -54,14 +57,28 @@ export default {
 
  },
   methods:{
-    login(values){
+    ...mapActions(useUserStore,{
+      authenticate:"loginUser",
+    }),
+    async login(values){
+      console.log(values);
       this.login_in_submission = true;
       this.login_show_alert = true;
       this.login_alert_variant ='bg-blue-500';
       this.login_alert_msg = 'Please wait! We are logging you in';
+      try{
+        await this.authenticate(values);
+      }catch(e){
+        console.log(e);
+        this.reg_in_submission = false;
+        this.login_alert_variant = 'bg-red-500';
+        this.login_alert_msg = 'Invalid Login Credentials';
+        return;
+      }
 
       this.login_alert_variant = 'bg-green-500';
       this.login_alert_msg = 'Success! You are now logged in';
+      window.location.reload();
     }
   }
 }
