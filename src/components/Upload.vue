@@ -9,38 +9,31 @@
     <div class="p-6">
       <!-- Upload Dropbox -->
       <div
+          @drag.prevent.stop=""
+          @dragstart.prevent.stop=""
+          @dragend.prevent.stop="is_dragover=false"
+          @dragover.prevent.stop="is_dragover=true"
+          @dragenter.prevent.stop="is_dragover=true"
+          @dragleave.prevent.stop="is_dragover=false"
+          @drop.prevent.stop="upload($event)"
           class="w-full px-10 py-20 rounded text-center cursor-pointer border border-dashed border-gray-400 text-gray-400 transition duration-500 hover:text-white hover:bg-green-400 hover:border-green-400 hover:border-solid"
+          :class="{'bg-green-400 border-green-400 border-solid':is_dragover}"
       >
         <h5>Drop your files here</h5>
       </div>
       <hr class="my-6" />
       <!-- Progess Bars -->
-      <div class="mb-4">
+      <div class="mb-4" v-for="upload in uploads" :key="upload.name">
         <!-- File Name -->
-        <div class="font-bold text-sm">Just another song.mp3</div>
+        <div class="font-bold text-sm" :class="upload.text_class">
+          <i :class="upload.icon"></i>
+          {{upload.name}}</div>
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
           <!-- Inner Progress Bar -->
           <div
               class="transition-all progress-bar bg-blue-400"
-              style="width: 75%"
-          ></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div
-              class="transition-all progress-bar bg-blue-400"
-              style="width: 35%"
-          ></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div
-              class="transition-all progress-bar bg-blue-400"
-              style="width: 55%"
+              :class="upload.variant"
+              :style="{width: upload.current_progress + '%' }"
           ></div>
         </div>
       </div>
@@ -50,8 +43,81 @@
 </template>
 
 <script>
+
+import {storage} from "@/includes/firebase";
+import {ref, uploadBytesResumable } from "firebase/storage";
+
 export default {
-  name: "Upload"
+  name: "Upload",
+  data(){
+    return{
+      is_dragover:false,
+      uploads : []
+    }
+  },
+  methods:{
+    upload($event){
+      this.is_dragover= false;
+
+      const files = [...$event.dataTransfer.files];
+
+      files.forEach((file)=>{
+        if(file.type !== 'audio/mpeg'){
+          return;
+        }
+
+        const storageRef = ref(storage);
+        const songsRef = ref(storageRef, `songs/${file.name}`);
+
+        const uploadTask = uploadBytesResumable(songsRef, file);
+
+
+        // .push returns the length of array , so we subtract 1 to get index of last inserted item.
+
+        const uploadIndex = this.uploads.push({
+          uploadTask,
+          current_progress:0,
+          name:file.name,
+          variant:'bg-blue-400',
+          icon:'fas fa-spinner fa-spin',
+          text_class:'',
+        }) -1 ;
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+              // Observe state change events such as progress, pause, and resume
+              // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              this.uploads[uploadIndex].current_progress = progress;
+              // switch (snapshot.state) {
+              //   case 'paused':
+              //     console.log('Upload is paused');
+              //     break;
+              //   case 'running':
+              //     console.log('Upload is running');
+              //     break;
+              // }
+            },
+            (error) => {
+              // Handle unsuccessful uploads
+                  this.uploads[uploadIndex].variant = 'bg-red-400';
+                  this.uploads[uploadIndex].icon = 'fas fa-times';
+                  this.uploads[uploadIndex].text_class = 'text-red-400';
+            },
+            () => {
+                  this.uploads[uploadIndex].variant = 'bg-green-400';
+                  this.uploads[uploadIndex].icon = 'fas fa-check';
+                  this.uploads[uploadIndex].text_class = 'text-green-400';
+              // Handle successful uploads on complete
+              // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+              // getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              //   console.log('File available at', downloadURL);
+              // });
+            }
+        );
+      });
+    }
+  },
 }
 </script>
 
