@@ -19,12 +19,14 @@ const storage = getStorage(app);
 
 
 const userCollection = collection(db,'users');
+const songsCollection = collection(db,'songs');
 
 
 export {
     auth,
     db,
     userCollection,
+    songsCollection,
     storage,
     onAuthStateChanged
 };

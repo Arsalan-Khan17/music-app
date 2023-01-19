@@ -21,6 +21,7 @@
       >
         <h5>Drop your files here</h5>
       </div>
+      <input type="file" multiple  @change="upload($event)">
       <hr class="my-6" />
       <!-- Progess Bars -->
       <div class="mb-4" v-for="upload in uploads" :key="upload.name">
@@ -31,7 +32,7 @@
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
           <!-- Inner Progress Bar -->
           <div
-              class="transition-all progress-bar bg-blue-400"
+              class="transition-all progress-bar"
               :class="upload.variant"
               :style="{width: upload.current_progress + '%' }"
           ></div>
@@ -44,8 +45,9 @@
 
 <script>
 
-import {storage} from "@/includes/firebase";
-import {ref, uploadBytesResumable } from "firebase/storage";
+import {storage,auth,songsCollection} from "@/includes/firebase";
+import {ref, uploadBytesResumable ,getDownloadURL} from "firebase/storage";
+import {addDoc} from "firebase/firestore";
 
 export default {
   name: "Upload",
@@ -59,7 +61,8 @@ export default {
     upload($event){
       this.is_dragover= false;
 
-      const files = [...$event.dataTransfer.files];
+      const files = $event.dataTransfer ? [...$event.dataTransfer.files] : [...$event.target.files];
+
 
       files.forEach((file)=>{
         if(file.type !== 'audio/mpeg'){
@@ -85,18 +88,9 @@ export default {
 
         uploadTask.on('state_changed',
             (snapshot) => {
-              // Observe state change events such as progress, pause, and resume
               // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
               this.uploads[uploadIndex].current_progress = progress;
-              // switch (snapshot.state) {
-              //   case 'paused':
-              //     console.log('Upload is paused');
-              //     break;
-              //   case 'running':
-              //     console.log('Upload is running');
-              //     break;
-              // }
             },
             (error) => {
               // Handle unsuccessful uploads
@@ -104,15 +98,24 @@ export default {
                   this.uploads[uploadIndex].icon = 'fas fa-times';
                   this.uploads[uploadIndex].text_class = 'text-red-400';
             },
-            () => {
-                  this.uploads[uploadIndex].variant = 'bg-green-400';
-                  this.uploads[uploadIndex].icon = 'fas fa-check';
-                  this.uploads[uploadIndex].text_class = 'text-green-400';
-              // Handle successful uploads on complete
-              // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-              // getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              //   console.log('File available at', downloadURL);
-              // });
+            async () => {
+
+              const song = {
+                uid: auth.currentUser.uid,
+                display_name: auth.currentUser.displayName,
+                original_name: uploadTask.snapshot.ref.name,
+                modified_name: uploadTask.snapshot.ref.name,
+                genre: '',
+                comment_count: 0
+              };
+
+              song.url = await getDownloadURL(uploadTask.snapshot.ref);
+
+              await addDoc(songsCollection, song);
+              this.uploads[uploadIndex].variant = 'bg-green-400';
+              this.uploads[uploadIndex].icon = 'fas fa-check';
+              this.uploads[uploadIndex].text_class = 'text-green-400';
+
             }
         );
       });
