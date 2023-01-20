@@ -97,6 +97,8 @@ export default {
                   this.uploads[uploadIndex].variant = 'bg-red-400';
                   this.uploads[uploadIndex].icon = 'fas fa-times';
                   this.uploads[uploadIndex].text_class = 'text-red-400';
+
+                  console.log(error);
             },
             async () => {
 
@@ -120,6 +122,12 @@ export default {
         );
       });
     }
+  },
+  beforeUnmount() {
+    this.uploads.forEach((upload)=>{
+      upload.uploadTask.cancel();
+
+    });
   },
 }
 </script>
