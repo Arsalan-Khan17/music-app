@@ -3,7 +3,7 @@
     <div class="md:grid md:grid-cols-3 md:gap-4">
       <div class="col-span-1">
 
-        <app-upload></app-upload>
+        <app-upload :addSong="addSong"></app-upload>
 
       </div>
       <div class="col-span-2">
@@ -19,7 +19,7 @@
           <div class="p-6">
             <!-- Composition Items -->
 
-            <composition-item v-for="song in songs" :key="song.docId" :song="song"></composition-item>
+            <composition-item v-for="(song,i) in songs" :key="song.docId" :song="song" :removeSong="removeSong" :updateSong="updateSong" :updateUnsavedFlag="updateUnsavedFlag" :index="i"></composition-item>
 
           </div>
         </div>
@@ -44,7 +44,8 @@ export default {
   },
   data(){
     return{
-      songs:[],
+      songs: [],
+      unsavedFlag:false,
     }
   },
 
@@ -53,16 +54,39 @@ export default {
    const q = query(songsCollection, where('uid','==',auth.currentUser.uid));
 
     const snapshot = await getDocs(q);
-   snapshot.forEach((doc) => {
-     // doc.data() is never undefined for query doc snapshots
-     const song = {
-       ...doc.data(),
-       docId:doc.id
-     }
-     this.songs.push(song);
-   });
+   snapshot.forEach(this.addSong);
+ },
+  methods:{
+    updateSong(i,values){
 
- }
+      this.songs[i].modified_name = values.modified_name;
+      this.songs[i].genre = values.genre;
+    },
+    removeSong(index){
+
+      this.songs.splice(index,1);
+    },
+    addSong(doc){
+      const song = {
+        ...doc.data(),
+        docId:doc.id
+      }
+      this.songs.push(song);
+    },
+    updateUnsavedFlag(value){
+      this.unsavedFlag = value;
+    }
+
+  },
+  beforeRouteLeave(to,from,next){
+    if(!this.unsavedFlag){
+      next();
+    }else{
+      const leave  = confirm('You have unsaved changes. Are you sure to leave this page?')
+      next(leave);
+    }
+
+  }
 
 
 }
