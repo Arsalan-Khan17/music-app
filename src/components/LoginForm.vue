@@ -61,7 +61,6 @@ export default {
       authenticate:"loginUser",
     }),
     async login(values){
-      console.log(values);
       this.login_in_submission = true;
       this.login_show_alert = true;
       this.login_alert_variant ='bg-blue-500';
@@ -69,7 +68,6 @@ export default {
       try{
         await this.authenticate(values);
       }catch(e){
-        console.log(e);
         this.reg_in_submission = false;
         this.login_alert_variant = 'bg-red-500';
         this.login_alert_msg = 'Invalid Login Credentials';

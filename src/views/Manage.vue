@@ -19,7 +19,15 @@
           <div class="p-6">
             <!-- Composition Items -->
 
-            <composition-item v-for="(song,i) in songs" :key="song.docId" :song="song" :removeSong="removeSong" :updateSong="updateSong" :updateUnsavedFlag="updateUnsavedFlag" :index="i"></composition-item>
+            <composition-item
+                v-for="(song,i) in songs"
+                :key="song.docId"
+                :song="song"
+                :removeSong="removeSong"
+                :updateSong="updateSong"
+                :updateUnsavedFlag="updateUnsavedFlag"
+                :index="i">
+            </composition-item>
 
           </div>
         </div>
